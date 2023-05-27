@@ -14,14 +14,16 @@ export default async function statusHandler(
 ) {
   const { status } = response;
   if (status == 200 || status == 201) {
-    return await response.json();
+    const json = await response.json();
+    return json;
   } else {
     if (status === 401) {
-      return await notAuthorized(onError, async () => {
+      return notAuthorized(onError, async () => {
         const res = await onUnAuthError();
         if (res.status !== 401) return statusHandler(res);
         store.dispatch("setIsAuthenticated", false);
-        return await res.json();
+        const json = await res.json();
+        return json;
       });
     } else if (status === 400 || status === 403) {
       const JSONResponse = await response.json();

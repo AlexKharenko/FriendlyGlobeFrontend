@@ -15,7 +15,7 @@ export default {
       if (!state.WebSocket) await dispatch("connectToWS");
       return state.WebSocket;
     },
-    async connectToWS({ commit, dispatch }) {
+    connectToWS({ commit, dispatch }) {
       const webSocket = new WebSocket(process.env.VUE_APP_WS_URL);
       webSocket.addEventListener("close", async (event) => {
         if (event.reason == "NewSignIn") {
@@ -23,7 +23,8 @@ export default {
           return router.push("/signin");
         }
         if (event.reason == "Unauthorized") {
-          return dispatch("refreshTokens");
+          await dispatch("refreshTokens");
+          return;
         }
         if (event.reason == "Forbidden") {
           return commit("setWS", null);
@@ -41,7 +42,7 @@ export default {
         dispatch("openCallingUserModal", data);
       }
     },
-    async disconnectWs({ state, commit }) {
+    disconnectWs({ state, commit }) {
       if (state.WebSocket) state.WebSocket.close();
       commit("setWS", null);
     },

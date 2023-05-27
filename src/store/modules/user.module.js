@@ -14,7 +14,8 @@ export default {
     async updateUser({ commit }, userData) {
       const response = await patchRequest(`/users/profile`, userData);
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/users/profile/`, userData);
+        const func = await patchRequest(`/users/profile/`, userData);
+        return func;
       });
       if (result?.success && result.signOut) {
         commit("setIsAuthenticated", false);
@@ -28,7 +29,8 @@ export default {
     async deleteUser({ commit }) {
       const response = await deleteRequest(`/users/profile`);
       const result = await statusHandler(response, async () => {
-        return deleteRequest(`/users/profile/`);
+        const func = await deleteRequest(`/users/profile/`);
+        return func;
       });
       if (result?.success && result.signOut) {
         commit("setIsAuthenticated", false);
@@ -44,9 +46,10 @@ export default {
         blockedUserId: userId,
       });
       const result = await statusHandler(response, async () => {
-        return postRequest(`/users/blacklist`, {
+        const func = await postRequest(`/users/blacklist`, {
           blockedUserId: userId,
         });
+        return func;
       });
       return result;
     },
@@ -54,7 +57,8 @@ export default {
     async removeUserFromBlacklist(data, userId) {
       const response = await deleteRequest(`/users/blacklist/${userId}`);
       const result = await statusHandler(response, async () => {
-        return deleteRequest(`/users/blacklist/${userId}`);
+        const func = await deleteRequest(`/users/blacklist/${userId}`);
+        return func;
       });
 
       return result;
@@ -63,7 +67,8 @@ export default {
     async updateProfilePhoto({ commit }, form) {
       const response = await patchRequestForm(`/users/profile/photo`, form);
       const result = await statusHandler(response, async () => {
-        return patchRequestForm(`/users/profile/photo`, form);
+        const func = await patchRequestForm(`/users/profile/photo`, form);
+        return func;
       });
       if (result?.success) commit("setProfilePhoto", result.profilePhotoURL);
       return result;
@@ -72,7 +77,8 @@ export default {
     async deleteProfilePhoto({ commit }) {
       const response = await deleteRequest(`/users/profile/photo`);
       const result = await statusHandler(response, async () => {
-        return deleteRequest(`/users/profile/photo`);
+        const func = await deleteRequest(`/users/profile/photo`);
+        return func;
       });
       if (result?.success) commit("setProfilePhoto", null);
       return result;
@@ -81,7 +87,8 @@ export default {
     async updateUserHidden({ commit }, userData) {
       const response = await patchRequest(`/users/profile/hidden`, userData);
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/users/profile/hidden`, userData);
+        const func = await patchRequest(`/users/profile/hidden`, userData);
+        return func;
       });
       if (result?.success) commit("setHidden", userData.hidden);
       return result;
@@ -90,7 +97,8 @@ export default {
     async updateUserPassword(data, userData) {
       const response = await patchRequest(`/users/profile/password`, userData);
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/users/profile/password`, userData);
+        const func = await patchRequest(`/users/profile/password`, userData);
+        return func;
       });
       return result;
     },
@@ -98,7 +106,8 @@ export default {
     async getProfile() {
       const response = await getRequest(`/users/profile`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/users/profile`);
+        const func = await getRequest(`/users/profile`);
+        return func;
       });
       if (result?.success) {
         return result;
@@ -109,7 +118,8 @@ export default {
     async getUserProfile(data, username) {
       const response = await getRequest(`/users/${username}`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/users/${username}`);
+        const func = await getRequest(`/users/${username}`);
+        return func;
       });
       if (result?.success) {
         return result;
@@ -120,7 +130,8 @@ export default {
     async verifyUser(data, userId) {
       const response = await patchRequest(`/admin/verify/${userId}`);
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/admin/verify/${userId}`);
+        const func = await patchRequest(`/admin/verify/${userId}`);
+        return func;
       });
       return result;
     },
@@ -128,7 +139,8 @@ export default {
     async unblockUser(data, userId) {
       const response = await patchRequest(`/admin/unblock/${userId}`);
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/admin/unblock/${userId}`);
+        const func = await patchRequest(`/admin/unblock/${userId}`);
+        return func;
       });
       return result;
     },
@@ -138,7 +150,10 @@ export default {
         blockMessage,
       });
       const result = await statusHandler(response, async () => {
-        return patchRequest(`/admin/block/${userId}`, { blockMessage });
+        const func = await patchRequest(`/admin/block/${userId}`, {
+          blockMessage,
+        });
+        return func;
       });
       return result;
     },
@@ -151,7 +166,8 @@ export default {
         .join("&");
       const response = await getRequest(`/admin/allusers?${query}`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/admin/allusers?${query}`);
+        const func = await getRequest(`/admin/allusers?${query}`);
+        return func;
       });
       if (result?.success) {
         return result;
@@ -171,7 +187,8 @@ export default {
         .join("&");
       const response = await getRequest(`/users?${query}`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/users?${query}`);
+        const func = await getRequest(`/users?${query}`);
+        return func;
       });
       if (result?.success) {
         return result;
@@ -182,7 +199,8 @@ export default {
     async getBlacklist() {
       const response = await getRequest(`/users/blacklist`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/users/blacklist`);
+        const func = await getRequest(`/users/blacklist`);
+        return func;
       });
       if (result?.success) {
         return result.users;

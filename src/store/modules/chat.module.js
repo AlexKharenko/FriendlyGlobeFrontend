@@ -11,7 +11,8 @@ export default {
     async getChats() {
       const response = await getRequest(`/chats`);
       const result = await statusHandler(response, async () => {
-        return getRequest(`/chats`);
+        const func = await getRequest(`/chats`);
+        return func;
       });
       if (result?.success) {
         return result.chats;
@@ -21,7 +22,8 @@ export default {
     async createChat(data, userData) {
       const response = await postRequest(`/chats`, userData);
       const result = await statusHandler(response, async () => {
-        return postRequest(`/chats`, userData);
+        const func = await postRequest(`/chats`, userData);
+        return func;
       });
       if (result?.success) {
         return result.chat;
@@ -32,7 +34,8 @@ export default {
       if (!chatId) return;
       const response = await deleteRequest(`/chats/${chatId}`);
       const result = await statusHandler(response, async () => {
-        return deleteRequest(`/chats/${chatId}`);
+        const func = await deleteRequest(`/chats/${chatId}`);
+        return func;
       });
       if (result?.success) {
         return result.success;

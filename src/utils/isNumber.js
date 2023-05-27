@@ -2,5 +2,6 @@ export const isNumberWithoutDecimal = (value) => {
   if (typeof value === "number") {
     value = value.toString();
   }
-  return /^\d+$/.test(value);
+  // eslint-disable-next-line prettier/prettier
+  return (/^\d+$/).test(value);
 };

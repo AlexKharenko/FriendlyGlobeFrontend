@@ -2,11 +2,8 @@ import statusHandler from "../../handlers/status.handler";
 import {
   deleteRequest,
   getRequest,
-  // patchRequest,
   postRequest,
-  // patchRequestForm,
 } from "../../handlers/request.handler";
-// import router from "@/router";
 
 export default {
   state: {},
@@ -14,7 +11,7 @@ export default {
     async getChats() {
       const response = await getRequest(`/chats`);
       const result = await statusHandler(response, async () => {
-        return await getRequest(`/chats`);
+        return getRequest(`/chats`);
       });
       if (result?.success) {
         return result.chats;
@@ -24,7 +21,7 @@ export default {
     async createChat(data, userData) {
       const response = await postRequest(`/chats`, userData);
       const result = await statusHandler(response, async () => {
-        return await postRequest(`/chats`, userData);
+        return postRequest(`/chats`, userData);
       });
       if (result?.success) {
         return result.chat;
@@ -35,7 +32,7 @@ export default {
       if (!chatId) return;
       const response = await deleteRequest(`/chats/${chatId}`);
       const result = await statusHandler(response, async () => {
-        return await deleteRequest(`/chats/${chatId}`);
+        return deleteRequest(`/chats/${chatId}`);
       });
       if (result?.success) {
         return result.success;

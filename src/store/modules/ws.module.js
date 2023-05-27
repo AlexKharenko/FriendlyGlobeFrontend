@@ -23,7 +23,7 @@ export default {
           return router.push("/signin");
         }
         if (event.reason == "Unauthorized") {
-          return await dispatch("refreshTokens");
+          return dispatch("refreshTokens");
         }
         if (event.reason == "Forbidden") {
           return commit("setWS", null);
@@ -48,7 +48,6 @@ export default {
     async sendWsMessage({ dispatch }, payload) {
       const ws = await dispatch("getWebSocketInctance");
       if (!ws) {
-        console.log("No ws");
         return;
       }
       if (ws.readyState != WebSocket.OPEN) setTimeout(() => {}, 100);

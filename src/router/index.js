@@ -139,10 +139,10 @@ const requiresLoading = (toRoute) => {
 };
 
 router.beforeEach(async (toRoute, fromRoute, next) => {
-  window.document.title =
-    toRoute.meta && toRoute.meta.title ? toRoute.meta.title : "FriendlyGlobe";
   if (store.getters.getErrorMessage !== "") store.dispatch("resetErrorMessage");
   requiresLoading(toRoute);
+  window.document.title =
+    toRoute.meta && toRoute.meta.title ? toRoute.meta.title : "FriendlyGlobe";
   if (toRoute.matched.some((record) => record.meta.requiresAuth)) {
     const user = await getCurrUser();
     if (user) {

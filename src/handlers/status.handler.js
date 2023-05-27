@@ -18,10 +18,10 @@ export default async function statusHandler(
   } else {
     if (status === 401) {
       return await notAuthorized(onError, async () => {
-        const response = await onUnAuthError();
-        if (response.status !== 401) return statusHandler(response);
+        const res = await onUnAuthError();
+        if (res.status !== 401) return statusHandler(res);
         store.dispatch("setIsAuthenticated", false);
-        return await response.json();
+        return await res.json();
       });
     } else if (status === 400 || status === 403) {
       const JSONResponse = await response.json();

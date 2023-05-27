@@ -9,6 +9,6 @@ export default async function notAuthorized(onError, onSuccess) {
   const { status } = response;
   const JSONResponse = await response.json();
   if (status >= 400) {
-    return await onError(JSONResponse);
-  } else if (status === 200) return await onSuccess(JSONResponse);
+    return onError(JSONResponse);
+  } else if (status === 200) return onSuccess(JSONResponse);
 }

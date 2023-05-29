@@ -36,7 +36,7 @@
           class="video-block recipient main-video"
           v-if="callInfo?.status == 'inProgress'"
         >
-          <div class="no-video" v-if="!remoteVideoEnabled">
+          <div class="no-video" v-if="!remoteVideoEnabled || !remoteStream">
             <div class="profile-photo-block">
               <img
                 v-if="getSecondUser?.profilePhotoURL"
@@ -282,6 +282,7 @@ export default {
     async addIceCandidate() {
       const candidate = this.getWsMessage.data.candidate;
       console.log(this.peerConnection.currentRemoteDescription);
+      console.log(this.remoteStream);
       if (this.peerConnection.currentRemoteDescription) {
         this.peerConnection.addIceCandidate(candidate);
       }

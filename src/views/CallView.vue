@@ -256,13 +256,13 @@ export default {
     },
 
     async createAnswer() {
+      const offer = this.getWsMessage.data.offer;
       await this.createPeerConnection();
       if (this.localStream) {
         this.toggleVideoEnabled();
         this.toggleAudioEnabled();
         this.remoteVideoEnabled = true;
       }
-      const offer = this.getWsMessage.data.offer;
       console.log(offer);
       await this.peerConnection.setRemoteDescription(offer);
       let answer = await this.peerConnection.createAnswer();

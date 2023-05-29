@@ -361,11 +361,11 @@ export default {
       await this.init();
     },
     async dialingLogic() {
-      await this.init();
       this.setCallInfo();
       this.message = `Calling ${this.getSecondUser?.username}`;
       const timeoutId = setTimeout(this.callTimeOuted, 60 * 1000);
       this.setCallingTimeout(timeoutId);
+      await this.init();
     },
     setCallInfo() {
       this.callInfo = this.getWsMessage.data.call;

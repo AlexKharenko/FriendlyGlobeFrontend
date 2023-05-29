@@ -236,13 +236,10 @@ export default {
 
       this.peerConnection.onicecandidate = async (event) => {
         if (event.candidate) {
-          // add
-          setTimeout(async () => {
-            await this.sendWsMessage({
-              event: "iceCandidate",
-              data: { candidate: event.candidate, chatId: this.chatId },
-            });
-          }, 100);
+          await this.sendWsMessage({
+            event: "iceCandidate",
+            data: { candidate: event.candidate, chatId: this.chatId },
+          });
         }
       };
     },

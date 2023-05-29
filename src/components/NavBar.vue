@@ -1,7 +1,12 @@
 <template>
   <nav class="navbar">
     <router-link to="/">Home</router-link>
-    <router-link v-if="isAuthenticated" to="/chats">Chats</router-link>
+    <div class="route-block" v-if="isAuthenticated">
+      <router-link v-if="isAuthenticated" to="/chats">Chats</router-link>
+      <span class="unread-messages-count" v-if="getUnreadMessagesCount > 0">{{
+        getUnreadMessagesCount
+      }}</span>
+    </div>
     <router-link v-if="isAuthenticated" :to="`/users/${getPayload.username}`">
       Profile
     </router-link>
@@ -18,7 +23,12 @@ import { mapActions, mapGetters } from "vuex";
 export default {
   name: "NavBar",
   computed: {
-    ...mapGetters(["isAdmin", "isAuthenticated", "getPayload"]),
+    ...mapGetters([
+      "isAdmin",
+      "isAuthenticated",
+      "getPayload",
+      "getUnreadMessagesCount",
+    ]),
   },
   methods: { ...mapActions(["signOut"]) },
 };
@@ -35,6 +45,24 @@ export default {
   gap: 0.6rem;
   height: var(--navbar-height);
   background: var(--ocean-color-half-transperent);
+  .route-block {
+    position: relative;
+    .unread-messages-count {
+      position: absolute;
+      top: -12px;
+      right: -7px;
+      padding: 1px 2px;
+      max-width: 24px;
+      height: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.8em;
+      background-color: var(--alert-color);
+      border-radius: 20px;
+      color: var(--light-white-color);
+    }
+  }
   button {
     border: none;
     background: none;

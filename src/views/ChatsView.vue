@@ -99,7 +99,12 @@ export default {
     };
   },
   computed: {
-    ...mapGetters(["getWS", "getPayload", "getWsMessage"]),
+    ...mapGetters([
+      "getWS",
+      "getPayload",
+      "getWsMessage",
+      "getUnreadMessagesCount",
+    ]),
     debouncedCheckScrollTop() {
       return this.debounce(this.checkScroll, 200);
     },
@@ -143,6 +148,7 @@ export default {
           await this.appendNewMessage(this.getWsMessage.data.newMessage);
         },
         newChat: () => {
+          this.changeUnreadMessagesCount("+");
           this.appendNewChat(this.getWsMessage.data.chat);
         },
         moreMessages: () => {
@@ -314,6 +320,10 @@ export default {
     removeChat(userId, chatId = null) {
       if (!userId && !chatId) return;
       if (userId) {
+        const foundChat = this.chats.find(
+          (chat) => chat.user1.userId == userId || chat.user2.userId == userId
+        );
+        this.changeUnreadMessagesCount("-", foundChat?.unreadCount);
         this.chats = this.chats.filter(
           (chat) => chat.user1.userId !== userId && chat.user2.userId !== userId
         );
@@ -353,11 +363,27 @@ export default {
         data: { userId },
       });
     },
+    changeUnreadMessagesCount(operator, number = 1) {
+      if (operator == "+") {
+        this.$store.commit(
+          "setUnreadMessagesCount",
+          this.getUnreadMessagesCount + number
+        );
+      } else {
+        this.$store.commit(
+          "setUnreadMessagesCount",
+          this.getUnreadMessagesCount - number
+        );
+      }
+    },
     readMessagesInChatByUserId(chatId, userId) {
       const foundChat = this.chats.find((chat) => chat.chatId == chatId);
       if (foundChat) {
         foundChat.messages.forEach((message) => {
-          if (message.receiverId == userId) message.read = true;
+          if (message.receiverId == userId && !message.read) {
+            message.read = true;
+            this.changeUnreadMessagesCount("-");
+          }
         });
       }
     },
@@ -382,7 +408,7 @@ export default {
           data: { userId: this.receiver.userId },
         });
         const chatId = this.currentChat.chatId;
-        this.removeChat(this.receiver.userId);
+        this.removeChat(null, chatId);
         await this.deleteChat(chatId);
         this.currentChat = null;
       }

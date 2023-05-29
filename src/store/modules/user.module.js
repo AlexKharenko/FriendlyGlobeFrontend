@@ -9,7 +9,12 @@ import {
 import router from "@/router";
 
 export default {
-  state: {},
+  state: { unreadMessagesCount: 0 },
+  getters: { getUnreadMessagesCount: (state) => state.unreadMessagesCount },
+  mutations: {
+    setUnreadMessagesCount: (state, value) =>
+      (state.unreadMessagesCount = value),
+  },
   actions: {
     async updateUser({ commit }, userData) {
       const response = await patchRequest(`/users/profile`, userData);

@@ -33,13 +33,28 @@ export default {
       webSocket.addEventListener("message", (event) => {
         const data = JSON.parse(event.data);
         commit("setWsMessage", data);
+        dispatch("changeUnreadMessagesCount", { event: data.event });
         dispatch("callInitiated", { event: data.event, data: data.data });
+        dispatch("unreadMessagesCount", { event: data.event, data: data.data });
       });
       commit("setWS", webSocket);
     },
     callInitiated({ dispatch }, { event, data }) {
       if (event == "callInitiated") {
         dispatch("openCallingUserModal", data);
+      }
+    },
+    unreadMessagesCount({ commit }, { event, data }) {
+      if (event == "unreadMessagesCount") {
+        commit("setUnreadMessagesCount", data.count);
+      }
+    },
+    changeUnreadMessagesCount({ commit, getters }, { event }) {
+      if (event == "newMessage") {
+        commit("setUnreadMessagesCount", getters.getUnreadMessagesCount + 1);
+      }
+      if (event == "messageDeleted") {
+        commit("setUnreadMessagesCount", getters.getUnreadMessagesCount - 1);
       }
     },
     disconnectWs({ state, commit }) {

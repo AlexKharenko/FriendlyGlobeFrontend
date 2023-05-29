@@ -51,7 +51,7 @@
       </section>
       <section>
         <h2>Looking for</h2>
-        <p class="looking-for-text" v-if="lookingFor">
+        <p class="looking-for-text" v-if="user?.lookingFor">
           {{ user.userDetails.bio }}
         </p>
         <p class="looking-for-text" v-else>

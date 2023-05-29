@@ -26,7 +26,7 @@
 <script>
 export default {
   name: "MessageInput",
-  props: ["disable"],
+  props: ["disable", "chatId"],
   emits: ["onSend"],
   data() {
     return {
@@ -43,6 +43,7 @@ export default {
     adjustTextareaHeight() {
       this.$nextTick(() => {
         const textarea = this.$refs.textarea;
+        if (!textarea) return;
         textarea.style.height = "auto";
         textarea.style.height = `${Math.min(
           textarea.scrollHeight,
@@ -50,6 +51,38 @@ export default {
         )}px`;
       });
     },
+    debounce(func, wait) {
+      let timeoutId;
+      return function debounced(...args) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+          func.apply(this, args);
+        }, wait);
+      };
+    },
+    handleResize() {
+      if (window.innerHeight <= 500) {
+        this.maxHeight = 100;
+      } else {
+        this.maxHeight = 200;
+      }
+      this.$nextTick(this.adjustTextareaHeight);
+    },
+  },
+  watch: {
+    chatId() {
+      this.message = "";
+      this.$nextTick(this.adjustTextareaHeight);
+    },
+  },
+  mounted() {
+    if (window.innerHeight <= 500) {
+      this.maxHeight = 100;
+    }
+    window.addEventListener("resize", this.debounce(this.handleResize, 100));
+  },
+  beforeUnmount() {
+    window.removeEventListener("resize", this.debounce(this.handleResize, 100));
   },
 };
 </script>
@@ -99,6 +132,11 @@ export default {
     }
     &:disabled svg {
       fill: var(--grey-color);
+    }
+  }
+  @media screen and (max-height: 500px) {
+    .message-input-block .message-input {
+      max-height: 100px;
     }
   }
 }

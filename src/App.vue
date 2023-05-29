@@ -5,18 +5,7 @@
       'message-block-shown': showMessageBlock,
     }"
   >
-    <nav class="navbar">
-      <router-link to="/">Home</router-link>
-      <router-link to="/chats" v-if="isAuthenticated">Chats</router-link>
-      <router-link v-if="isAuthenticated" :to="`/users/${getPayload.username}`">
-        Profile
-      </router-link>
-      <router-link to="/search">Search</router-link>
-      <router-link v-if="isAdmin" to="/admin">Admin</router-link>
-      <router-link v-if="!isAuthenticated" to="/signin">SignIn</router-link>
-      <router-link v-if="!isAuthenticated" to="/signup">SignUp</router-link>
-      <button v-if="isAuthenticated" @click="signOut">SignOut</button>
-    </nav>
+    <NavBar />
     <div class="messages-block" v-if="showMessageBlock">
       <div class="sticky-message" v-if="getPayload.hidden">
         You are in hidden mode
@@ -42,8 +31,9 @@
 <script>
 import { mapActions, mapGetters } from "vuex";
 import CallingUserModal from "./components/Modals/CallingUserModal.vue";
+import NavBar from "./components/NavBar.vue";
 export default {
-  components: { CallingUserModal },
+  components: { CallingUserModal, NavBar },
   computed: {
     ...mapGetters(["isAuthenticated", "isAdmin", "getPayload", "getWS"]),
     showMessageBlock() {
@@ -106,6 +96,7 @@ r
   position: fixed;
   top: 0;
   left: 0;
+  z-index: 100;
 }
 
 .error-msg,
@@ -187,39 +178,6 @@ r
       &:not(.signin, .signup) {
         margin: 0;
       }
-    }
-  }
-}
-
-.navbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6rem;
-  height: var(--navbar-height);
-  background: var(--ocean-color-half-transperent);
-  button {
-    border: none;
-    background: none;
-    font: inherit;
-    cursor: pointer;
-  }
-  button,
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    text-decoration: none;
-
-    &.router-link-exact-active {
-      color: #277d58;
-      text-decoration: underline;
-    }
-    &:hover,
-    &:focus-visible {
-      text-decoration: underline;
     }
   }
 }

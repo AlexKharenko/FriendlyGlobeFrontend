@@ -1,6 +1,6 @@
 <template>
   <div class="chats-view">
-    <div class="side-bar-left">
+    <div class="side-bar-left" :class="{ hidden: sideBarHidden }">
       <h3>Chats</h3>
       <ChatItem
         v-for="chat in chats"
@@ -10,6 +10,11 @@
         @click="chooseChat(chat)"
       />
     </div>
+    <button class="toggle-chats" @click="toggleSideBar">
+      <span class="line"></span>
+      <span class="line"></span>
+      <span class="line"></span>
+    </button>
     <div class="chat-container">
       <div class="header">
         <div class="username">
@@ -53,7 +58,11 @@
         </div>
       </div>
 
-      <MessageInput :disable="!currentChat" @onSend="sendNewMessage" />
+      <MessageInput
+        :disable="!currentChat"
+        :chatId="currentChat?.chatId"
+        @onSend="sendNewMessage"
+      />
     </div>
     <EditMessageModal
       @editMessage="onEditMessage"
@@ -86,6 +95,7 @@ export default {
       editMessageModalOpened: false,
       chats: [],
       lastTopPosition: 0,
+      sideBarHidden: true,
     };
   },
   computed: {
@@ -189,6 +199,9 @@ export default {
       "addToBlacklist",
       "sendWsMessage",
     ]),
+    toggleSideBar() {
+      this.sideBarHidden = !this.sideBarHidden;
+    },
     debounce(func, wait) {
       let timeoutId;
       return function debounced(...args) {
@@ -223,6 +236,7 @@ export default {
     },
     chooseChat(chat) {
       this.currentChat = chat;
+      this.sideBarHidden = true;
     },
     async sendNewMessage(message) {
       if (this.currentChat) {
@@ -447,6 +461,8 @@ export default {
     this.chats = await this.getChats();
     if (chat) {
       this.currentChat = this.chats.find((item) => item.chatId == chat.chatId);
+    } else {
+      this.sideBarHidden = false;
     }
     await this.sendWsMessage({ event: "getOnlineUsers" });
   },
@@ -468,6 +484,9 @@ export default {
       padding: 0.7rem 0.5rem 0.7rem 0.5rem;
       border-bottom: solid 1px var(--light-grey-color);
     }
+  }
+  .toggle-chats {
+    display: none;
   }
   .chat-container {
     max-height: inherit;
@@ -534,6 +553,83 @@ export default {
         display: grid;
         justify-items: start;
       }
+    }
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .chats-view {
+    display: block;
+    .side-bar-left {
+      position: absolute;
+      height: calc(100vh - var(--navbar-height) - var(--messages-block-height));
+      overflow-y: auto;
+      z-index: 10;
+      left: 0;
+      width: 250px;
+      transition: left 0.3s ease-in-out;
+      &.hidden {
+        left: -250px;
+      }
+      &.hidden + .toggle-chats {
+        left: 0;
+      }
+    }
+    .toggle-chats {
+      display: block;
+      position: absolute;
+      top: 0.6rem;
+      left: 210px;
+      background: white;
+      border-radius: 3px;
+      padding: 1px;
+      height: 24px;
+      width: 24px;
+      outline: none;
+      border: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      z-index: 11;
+      transition: left 0.3s ease-in-out;
+      cursor: pointer;
+      .line {
+        display: block;
+        background: black;
+        width: 100%;
+        height: 3px;
+      }
+    }
+    .chat-container {
+      height: calc(100vh - var(--navbar-height) - var(--messages-block-height));
+      width: 100%;
+      .header .username {
+        padding-left: 1rem;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .chats-view {
+    display: block;
+    .side-bar-left {
+      position: absolute;
+      height: calc(100vh - var(--navbar-height) - var(--messages-block-height));
+      overflow-y: auto;
+      z-index: 10;
+      left: 0;
+      width: 100%;
+      transition: left 0.3s ease-in-out;
+      &.hidden {
+        left: -100%;
+      }
+      &.hidden + .toggle-chats {
+        left: 0;
+      }
+    }
+    .toggle-chats {
+      left: 90%;
     }
   }
 }

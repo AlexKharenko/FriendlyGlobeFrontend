@@ -105,6 +105,7 @@ export default {
 .modal {
   text-align: left;
   border-radius: 10px;
+  z-index: 101;
   .header {
     display: flex;
     justify-content: space-between;

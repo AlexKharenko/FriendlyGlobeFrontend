@@ -5,7 +5,12 @@
       <label for="file-upload" class="upload-label">
         <span>Upload image</span>
       </label>
-      <input id="file-upload" type="file" @change="handleImageUpload" />
+      <input
+        id="file-upload"
+        type="file"
+        @change="handleImageUpload"
+        accept="image/jpeg, image/png"
+      />
     </div>
     <button v-if="imageFile" class="update-button" @click="handleImageUpdate">
       Update image

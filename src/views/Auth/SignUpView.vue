@@ -132,7 +132,7 @@
             Choose languages you are interested in (at least 1)
           </p>
           <div class="inputs-container">
-            <FormInputSlot title="Hobbies and interests">
+            <FormInputSlot title="Languages">
               <template #input>
                 <VueMultiselect
                   v-model="signUpData.languages"

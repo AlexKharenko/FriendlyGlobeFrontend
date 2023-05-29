@@ -371,7 +371,13 @@ export default {
       if (this.getErrorMessage)
         return window.scroll({ top: 0, behavior: "smooth" });
 
-      if (success) alert("Password updated succesfully");
+      if (success) {
+        alert("Password updated succesfully");
+        this.v.updatePasswrod.$reset();
+        this.v.passwordConfirm.$reset();
+        this.updatePasswrod.password = "";
+        this.passwordConfirm = "";
+      }
     },
     async updateUserSubmit() {
       this.v.updateData.$touch();

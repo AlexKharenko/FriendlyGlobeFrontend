@@ -36,7 +36,7 @@
           class="video-block recipient main-video"
           v-if="callInfo?.status == 'inProgress'"
         >
-          <div class="no-video" v-if="!remoteStream">
+          <div class="no-video" v-if="!remoteVideoEnabled">
             <div class="profile-photo-block">
               <img
                 v-if="getSecondUser?.profilePhotoURL"
@@ -103,6 +103,7 @@ export default {
       videoEnabled: true,
       audioEnabled: true,
       peerConnection: null,
+      remoteVideoEnabled: false,
       stunServers: {
         iceServers: [
           {
@@ -157,6 +158,9 @@ export default {
       return {
         error: () => {
           this.$router.push("/505");
+        },
+        remoteVideoToggled: () => {
+          this.remoteVideoEnabled = this.getWsMessage.data.enabled;
         },
         noChatFound: () => {
           this.redirectToChats();
@@ -256,8 +260,10 @@ export default {
       if (this.localStream) {
         this.toggleVideoEnabled();
         this.toggleAudioEnabled();
+        this.remoteVideoEnabled = true;
       }
       const offer = this.getWsMessage.data.offer;
+      console.log(offer);
       await this.peerConnection.setRemoteDescription(offer);
       let answer = await this.peerConnection.createAnswer();
       await this.peerConnection.setLocalDescription(answer);
@@ -289,7 +295,7 @@ export default {
         tracks.forEach((track) => track.stop());
       }
     },
-    toggleVideoEnabled() {
+    async toggleVideoEnabled() {
       this.videoEnabled = !this.videoEnabled;
       if (this.localStream) {
         let videoTrack = this.localStream
@@ -297,6 +303,7 @@ export default {
           .find((track) => track.kind === "video");
 
         videoTrack.enabled = this.videoEnabled;
+        await this.toggleLocalVideoEnabled();
       }
     },
     toggleAudioEnabled() {
@@ -388,6 +395,15 @@ export default {
     redirectToChats() {
       this.stopStreams();
       this.$router.push("/chats");
+    },
+
+    async toggleLocalVideoEnabled() {
+      if (this.remoteStream && this.callInfo && this.chatId) {
+        await this.sendWsMessage({
+          event: "toggleVideo",
+          data: { enabled: this.videoEnabled, chatId: this.chatId },
+        });
+      }
     },
 
     async handleEndCallClick() {

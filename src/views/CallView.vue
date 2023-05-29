@@ -260,10 +260,9 @@ export default {
         this.toggleAudioEnabled();
         this.remoteVideoEnabled = true;
       }
-      console.log(offer);
-      await this.peerConnection.setRemoteDescription(offer);
+      this.peerConnection.setRemoteDescription(offer);
       let answer = await this.peerConnection.createAnswer();
-      await this.peerConnection.setLocalDescription(answer);
+      this.peerConnection.setLocalDescription(answer);
       await this.sendWsMessage({
         event: "callAnswer",
         data: { answer, chatId: this.chatId },
@@ -282,6 +281,7 @@ export default {
     },
     async addIceCandidate() {
       const candidate = this.getWsMessage.data.candidate;
+      console.log(this.peerConnection.currentRemoteDescription);
       if (this.peerConnection.currentRemoteDescription) {
         this.peerConnection.addIceCandidate(candidate);
       }

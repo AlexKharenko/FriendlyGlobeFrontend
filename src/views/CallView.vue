@@ -215,33 +215,50 @@ export default {
         this.redirectToChats();
       }
     },
+
+    waitForConnectionEstablishment(peerConnection) {
+      return new Promise((resolve, reject) => {
+        peerConnection.oniceconnectionstatechange = () => {
+          if (peerConnection.iceConnectionState === "connected") {
+            resolve();
+          } else if (peerConnection.iceConnectionState === "failed") {
+            reject(new Error("Connection failed"));
+          }
+        };
+      });
+    },
     async createPeerConnection() {
       this.peerConnection = new RTCPeerConnection(this.stunServers);
-      this.remoteStream = new MediaStream();
-      this.$nextTick(() => {
-        this.$refs.remoteVideo.srcObject = this.remoteStream;
-      });
-
-      if (!this.localStream) await this.init();
-
-      this.localStream.getTracks().forEach((track) => {
-        this.peerConnection.addTrack(track, this.localStream);
-      });
-
-      this.peerConnection.ontrack = (event) => {
-        event.streams[0].getTracks().forEach((track) => {
-          this.remoteStream.addTrack(track);
+      try {
+        await this.waitForConnectionEstablishment(this.peerConnection);
+        this.remoteStream = new MediaStream();
+        this.$nextTick(() => {
+          this.$refs.remoteVideo.srcObject = this.remoteStream;
         });
-      };
 
-      this.peerConnection.onicecandidate = async (event) => {
-        if (event.candidate) {
-          await this.sendWsMessage({
-            event: "iceCandidate",
-            data: { candidate: event.candidate, chatId: this.chatId },
+        if (!this.localStream) await this.init();
+
+        this.localStream.getTracks().forEach((track) => {
+          this.peerConnection.addTrack(track, this.localStream);
+        });
+
+        this.peerConnection.ontrack = (event) => {
+          event.streams[0].getTracks().forEach((track) => {
+            this.remoteStream.addTrack(track);
           });
-        }
-      };
+        };
+
+        this.peerConnection.onicecandidate = async (event) => {
+          if (event.candidate) {
+            await this.sendWsMessage({
+              event: "iceCandidate",
+              data: { candidate: event.candidate, chatId: this.chatId },
+            });
+          }
+        };
+      } catch (err) {
+        console.log(err);
+      }
     },
 
     async createOffer() {

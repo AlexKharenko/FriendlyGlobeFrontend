@@ -210,7 +210,6 @@ export default {
           this.$refs.localVideo.srcObject = this.localStream;
         });
       } catch (err) {
-        console.log(err);
         await this.endCall();
         alert("Can't get your camera! You will be redirected immediately!");
         this.redirectToChats();
@@ -280,14 +279,6 @@ export default {
         this.peerConnection.setRemoteDescription(answer);
       }
     },
-    // async addIceCandidate() {
-    //   const candidate = this.getWsMessage.data.candidate;
-    //   console.log(this.peerConnection.currentRemoteDescription);
-    //   console.log(this.remoteStream);
-    //   if (this.peerConnection.currentRemoteDescription) {
-    //     this.peerConnection.addIceCandidate(candidate);
-    //   }
-    // },
     async addIceCandidate() {
       const candidate = this.getWsMessage.data.candidate;
       this.iceCandidates.push(candidate);
@@ -604,6 +595,25 @@ export default {
       &.media-btn:focus-visible {
         background-color: var(--light-white-color);
         box-shadow: 0 0 15px #b8b7b7;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .call-view {
+    .view-block {
+      .videos-container {
+        .video-block {
+          position: relative;
+          aspect-ratio: 9/16;
+          &.small-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 90px;
+          }
+        }
       }
     }
   }

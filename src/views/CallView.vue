@@ -128,6 +128,7 @@ export default {
         },
         audio: true,
       },
+      iceCandidates: [],
     };
   },
   computed: {
@@ -215,50 +216,33 @@ export default {
         this.redirectToChats();
       }
     },
-
-    waitForConnectionEstablishment(peerConnection) {
-      return new Promise((resolve, reject) => {
-        peerConnection.oniceconnectionstatechange = () => {
-          if (peerConnection.iceConnectionState === "connected") {
-            resolve();
-          } else if (peerConnection.iceConnectionState === "failed") {
-            reject(new Error("Connection failed"));
-          }
-        };
-      });
-    },
     async createPeerConnection() {
       this.peerConnection = new RTCPeerConnection(this.stunServers);
-      try {
-        await this.waitForConnectionEstablishment(this.peerConnection);
-        this.remoteStream = new MediaStream();
-        this.$nextTick(() => {
-          this.$refs.remoteVideo.srcObject = this.remoteStream;
+      this.remoteStream = new MediaStream();
+      this.$nextTick(() => {
+        this.$refs.remoteVideo.srcObject = this.remoteStream;
+      });
+
+      if (!this.localStream) await this.init();
+
+      this.localStream.getTracks().forEach((track) => {
+        this.peerConnection.addTrack(track, this.localStream);
+      });
+
+      this.peerConnection.ontrack = (event) => {
+        event.streams[0].getTracks().forEach((track) => {
+          this.remoteStream.addTrack(track);
         });
+      };
 
-        if (!this.localStream) await this.init();
-
-        this.localStream.getTracks().forEach((track) => {
-          this.peerConnection.addTrack(track, this.localStream);
-        });
-
-        this.peerConnection.ontrack = (event) => {
-          event.streams[0].getTracks().forEach((track) => {
-            this.remoteStream.addTrack(track);
+      this.peerConnection.onicecandidate = async (event) => {
+        if (event.candidate) {
+          await this.sendWsMessage({
+            event: "iceCandidate",
+            data: { candidate: event.candidate, chatId: this.chatId },
           });
-        };
-
-        this.peerConnection.onicecandidate = async (event) => {
-          if (event.candidate) {
-            await this.sendWsMessage({
-              event: "iceCandidate",
-              data: { candidate: event.candidate, chatId: this.chatId },
-            });
-          }
-        };
-      } catch (err) {
-        console.log(err);
-      }
+        }
+      };
     },
 
     async createOffer() {
@@ -296,12 +280,31 @@ export default {
         this.peerConnection.setRemoteDescription(answer);
       }
     },
+    // async addIceCandidate() {
+    //   const candidate = this.getWsMessage.data.candidate;
+    //   console.log(this.peerConnection.currentRemoteDescription);
+    //   console.log(this.remoteStream);
+    //   if (this.peerConnection.currentRemoteDescription) {
+    //     this.peerConnection.addIceCandidate(candidate);
+    //   }
+    // },
     async addIceCandidate() {
       const candidate = this.getWsMessage.data.candidate;
-      console.log(this.peerConnection.currentRemoteDescription);
-      console.log(this.remoteStream);
+      this.iceCandidates.push(candidate);
+
       if (this.peerConnection.currentRemoteDescription) {
+        // If the currentRemoteDescription is set, add the candidate immediately
         this.peerConnection.addIceCandidate(candidate);
+      } else {
+        // Process stored iceCandidates when currentRemoteDescription is set
+        this.peerConnection.onaddstream = () => {
+          // Iterate through the stored iceCandidates and add them to the peerConnection
+          for (const storedCandidate of this.iceCandidates) {
+            this.peerConnection.addIceCandidate(storedCandidate);
+          }
+          // Clear the iceCandidates array after processing
+          this.iceCandidates = [];
+        };
       }
     },
     stopStream(videoStream) {

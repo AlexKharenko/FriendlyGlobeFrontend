@@ -23,7 +23,12 @@
       :class="{
         'margin-top': !showMessageBlock,
       }"
-    />
+      v-slot="{ Component }"
+    >
+      <transition name="route" mode="out-in">
+        <component :is="Component"></component>
+      </transition>
+    </router-view>
     <CallingUserModal />
   </div>
 </template>
@@ -170,6 +175,37 @@ r
       }
     }
   }
+}
+
+// Route transitions
+
+.route-enter-from {
+  opacity: 0;
+  transform: translateX(100px);
+}
+
+.route-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.route-leave-to {
+  opacity: 0;
+  transform: translateX(-100px);
+}
+
+.route-leave-active {
+  transition: all 0.3s ease-in;
+}
+
+.loading-enter-active,
+.loading-leave-active {
+  transition: all 0.2s ease;
+}
+
+.loading-enter-from,
+.loading-leave-to {
+  opacity: 0;
+  transform: scale(1.5);
 }
 
 @media screen and (max-width: 600px) {

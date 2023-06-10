@@ -277,6 +277,7 @@ export default {
       const answer = this.getWsMessage.data.answer;
       if (!this.peerConnection.currentRemoteDescription) {
         this.peerConnection.setRemoteDescription(answer);
+        await this.toggleLocalVideoEnabled();
       }
     },
     async addIceCandidate() {
@@ -284,16 +285,12 @@ export default {
       this.iceCandidates.push(candidate);
 
       if (this.peerConnection.currentRemoteDescription) {
-        // If the currentRemoteDescription is set, add the candidate immediately
         this.peerConnection.addIceCandidate(candidate);
       } else {
-        // Process stored iceCandidates when currentRemoteDescription is set
         this.peerConnection.onaddstream = () => {
-          // Iterate through the stored iceCandidates and add them to the peerConnection
           for (const storedCandidate of this.iceCandidates) {
             this.peerConnection.addIceCandidate(storedCandidate);
           }
-          // Clear the iceCandidates array after processing
           this.iceCandidates = [];
         };
       }
@@ -399,6 +396,7 @@ export default {
           event: "endCall",
           data: { chatId: this.chatId },
         });
+        this.callInfo = null;
       }
     },
     redirectToChats() {
@@ -518,12 +516,14 @@ export default {
           top: 2rem;
           left: 2rem;
           width: 250px;
-          background-color: #201f1f;
           z-index: 1;
           .no-video {
             max-height: 100%;
-            width: 45%;
+            width: 100%;
             gap: 0.2rem;
+            padding: 0.4rem;
+
+            background-color: #363535;
             .profile-photo-block .no-photo-circle {
               font-size: 2em;
             }

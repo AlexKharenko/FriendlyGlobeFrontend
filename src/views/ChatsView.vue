@@ -598,7 +598,7 @@ export default {
         left: -250px;
       }
       &.hidden + .toggle-chats {
-        left: 0;
+        left: 10px;
       }
     }
     .toggle-chats {
@@ -630,7 +630,7 @@ export default {
       height: calc(100vh - var(--navbar-height) - var(--messages-block-height));
       width: 100%;
       .header .username {
-        padding-left: 1rem;
+        padding-left: 2rem;
       }
     }
   }
@@ -651,7 +651,7 @@ export default {
         left: -100%;
       }
       &.hidden + .toggle-chats {
-        left: 0;
+        left: 10px;
       }
     }
     .toggle-chats {

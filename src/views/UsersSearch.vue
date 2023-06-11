@@ -120,6 +120,7 @@ import { mapActions, mapGetters } from "vuex";
 
 import useVuelidate from "@vuelidate/core";
 import { minValue, maxValue } from "@vuelidate/validators";
+import { isNumberWithoutDecimal } from "@/utils/isNumber";
 
 import FormInputSlot from "@/components/Inputs/FormInputSlot.vue";
 import FormInput from "@/components/Inputs/FormInput.vue";
@@ -211,8 +212,15 @@ export default {
   },
   methods: {
     ...mapActions(["getUsers", "getCHLLists"]),
-    async changePage(pageNumber) {
-      this.currentPage = pageNumber;
+    isNumberWithoutDecimal,
+    changePage(pageNumber) {
+      this.$router.push({ query: { page: pageNumber } });
+    },
+    async onSubmit() {
+      this.v.$touch();
+      if (this.v.$error) return;
+      this.currentPage = 1;
+      this.changePage(1);
       const { users, count: usersCount } = await this.getUsers({
         ...this.filters,
         page: this.currentPage,
@@ -220,10 +228,11 @@ export default {
       this.users = users;
       this.usersCount = usersCount;
     },
-    async onSubmit() {
-      this.v.$touch();
-      if (this.v.$error) return;
-      this.currentPage = 1;
+    handleQuery() {
+      const { page } = this.$route.query;
+      if (this.isNumberWithoutDecimal(page)) this.currentPage = +page || 1;
+    },
+    async setUsers() {
       const { users, count: usersCount } = await this.getUsers({
         ...this.filters,
         page: this.currentPage,
@@ -233,6 +242,14 @@ export default {
     },
   },
   watch: {
+    usersCount() {
+      const { page } = this.$route?.query;
+      if (this.isNumberWithoutDecimal(page)) {
+        if (this.totalPages < +page) {
+          this.changePage(1);
+        }
+      }
+    },
     languages() {
       this.filters.languages = this.languages.map((item) => item.languageId);
     },
@@ -249,15 +266,19 @@ export default {
       this.filters.sex = this.sex.value;
     },
   },
+  async beforeRouteUpdate(to) {
+    if (to.name == "UsersSearch") {
+      const { page } = to.query;
+      if (this.isNumberWithoutDecimal(page)) this.currentPage = +page || 1;
+      await this.setUsers();
+    }
+  },
   async mounted() {
+    this.handleQuery();
     this.orderBy = await this.getOrderByList[0];
     this.sex = await this.getFilterSexList[0];
-    const { users, count: usersCount } = await this.getUsers({
-      ...this.filters,
-      page: this.currentPage,
-    });
-    this.users = users;
-    this.usersCount = usersCount;
+
+    await this.setUsers();
     await this.getCHLLists();
   },
 };

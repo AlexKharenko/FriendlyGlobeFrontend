@@ -37,6 +37,7 @@
           unfold before you. Start exploring, start chatting, and start building
           friendships that know no boundaries.
         </p>
+        <p>Contact Us: friendlyglobe@gmail.com</p>
       </div>
       <div class="sign-in-block" v-if="!isAuthenticated">
         <h4>

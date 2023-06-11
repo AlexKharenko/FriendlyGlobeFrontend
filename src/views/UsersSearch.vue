@@ -154,7 +154,7 @@ export default {
       users: [],
       currentPage: 1,
       usersCount: 0,
-      itemsPerPage: 10,
+      itemsPerPage: 12,
       orderBy: "",
       sex: "",
       countries: [],
@@ -214,23 +214,135 @@ export default {
     ...mapActions(["getUsers", "getCHLLists"]),
     isNumberWithoutDecimal,
     changePage(pageNumber) {
-      this.$router.push({ query: { page: pageNumber } });
+      const queryFiltersObjs = this.queryFilters();
+      this.$router.replace({
+        query: { page: pageNumber, ...queryFiltersObjs },
+      });
     },
     async onSubmit() {
       this.v.$touch();
       if (this.v.$error) return;
-      this.currentPage = 1;
       this.changePage(1);
-      const { users, count: usersCount } = await this.getUsers({
-        ...this.filters,
-        page: this.currentPage,
-      });
-      this.users = users;
-      this.usersCount = usersCount;
+    },
+    queryFilters() {
+      const {
+        search,
+        minAge,
+        maxAge,
+        countries,
+        languages,
+        hobbies,
+        orderBy,
+        sex,
+      } = this.filters;
+      const query = {};
+
+      if (search) {
+        query.search = search;
+      }
+
+      if (minAge !== "") {
+        query.minAge = minAge;
+      }
+
+      if (maxAge !== "") {
+        query.maxAge = maxAge;
+      }
+
+      if (countries.length > 0) {
+        query.countries = `[${countries.join(",")}]`;
+      }
+
+      if (languages.length > 0) {
+        query.languages = `[${languages.join(",")}]`;
+      }
+
+      if (hobbies.length > 0) {
+        query.hobbies = `[${hobbies.join(",")}]`;
+      }
+
+      if (orderBy) {
+        query.orderBy = orderBy;
+      }
+
+      if (sex) {
+        query.sex = sex;
+      }
+
+      return query;
+    },
+    handleArrayFilter(name, list, originalList, field) {
+      let parsedList = [];
+      if (list) {
+        try {
+          parsedList = JSON.parse(list);
+        } catch {
+          parsedList = [];
+        }
+        if (
+          Array.isArray(parsedList) &&
+          parsedList.every((item) => this.isNumberWithoutDecimal(item))
+        ) {
+          this.filters[name] = parsedList.map(Number);
+          this[name] = originalList.filter((object) =>
+            parsedList.includes(object[field])
+          );
+        }
+      }
     },
     handleQuery() {
-      const { page } = this.$route.query;
+      const {
+        page,
+        search,
+        minAge,
+        maxAge,
+        countries,
+        languages,
+        hobbies,
+        orderBy,
+        sex,
+      } = this.$route.query;
       if (this.isNumberWithoutDecimal(page)) this.currentPage = +page || 1;
+      this.filters.search = search || "";
+      if (maxAge && maxAge >= 12 && maxAge <= 120) {
+        if (!minAge) {
+          this.filters.maxAge = +maxAge;
+        } else if (minAge >= 12 && minAge <= 120 && minAge < maxAge) {
+          this.filters.maxAge = +maxAge;
+        }
+      }
+      if (minAge && minAge >= 12 && minAge <= 120) {
+        if (!maxAge) {
+          this.filters.minAge = +minAge;
+        } else if (maxAge >= 12 && maxAge <= 120 && maxAge > minAge) {
+          this.filters.minAge = +minAge;
+        }
+      }
+      this.handleArrayFilter(
+        "countries",
+        countries,
+        this.getCountriesList,
+        "countryId"
+      );
+      this.handleArrayFilter(
+        "languages",
+        languages,
+        this.getLanguagesList,
+        "languageId"
+      );
+      this.handleArrayFilter(
+        "hobbies",
+        hobbies,
+        this.getHobbiesList,
+        "hobbyId"
+      );
+
+      this.filters.orderBy =
+        orderBy === "asc" || orderBy === "desc" ? orderBy : "";
+      this.filters.sex = ["M", "F"].includes(sex) ? sex : "";
+      this.sex =
+        this.getFilterSexList.find((item) => item.value == sex) ||
+        this.getFilterSexList[0];
     },
     async setUsers() {
       const { users, count: usersCount } = await this.getUsers({
@@ -263,7 +375,7 @@ export default {
       this.filters.orderBy = this.orderBy.value;
     },
     sex() {
-      this.filters.sex = this.sex.value;
+      this.filters.sex = this.sex?.value;
     },
   },
   async beforeRouteUpdate(to) {
@@ -274,12 +386,12 @@ export default {
     }
   },
   async mounted() {
-    this.handleQuery();
     this.orderBy = await this.getOrderByList[0];
     this.sex = await this.getFilterSexList[0];
+    await this.getCHLLists();
+    this.handleQuery();
 
     await this.setUsers();
-    await this.getCHLLists();
   },
 };
 </script>

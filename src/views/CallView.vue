@@ -209,6 +209,8 @@ export default {
         this.$nextTick(() => {
           this.$refs.localVideo.srcObject = this.localStream;
         });
+        await this.toggleVideoEnabled();
+        this.toggleAudioEnabled();
       } catch (err) {
         await this.endCall();
         alert("Can't get your camera! You will be redirected immediately!");
@@ -256,7 +258,7 @@ export default {
       const offer = this.getWsMessage.data.offer;
       await this.createPeerConnection();
       if (this.localStream) {
-        this.toggleVideoEnabled();
+        await this.toggleVideoEnabled();
         this.toggleAudioEnabled();
         this.remoteVideoEnabled = true;
       }
